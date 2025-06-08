@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公司贷款利率测算工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #0ea5e9;
+            --light: #f0f9ff;
+            --dark: #1e293b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray: #64748b;
+            --light-gray: #e2e8f0;
+            --border-radius: 10px;
+            --box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7f1 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: var(--transition);
+            border: 1px solid rgba(37, 99, 235, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(37, 99, 235, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1.05rem;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .input-field {
+            flex: 1;
+            min-width: 240px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-size: 1.05rem;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-top: 8px;
+        }
+
+        .radio-option, .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(224, 242, 254, 0.5);
+            padding: 14px 18px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .radio-option:hover, .checkbox-option:hover {
+            background: rgba(219, 234, 254, 0.8);
+            transform: translateY(-2px);
+        }
+
+        .radio-option.active, .checkbox-option.active {
+            border-color: var(--primary);
+            background: rgba(219, 234, 254, 0.8);
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.1);
+        }
+
+        .radio-option i, .checkbox-option i {
+            font-size: 1.3rem;
+            color: var(--primary);
+        }
+
+        .radio-option input, .checkbox-option input {
+            width: auto;
+        }
+
+        .config-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 20px;
+            padding: 12px 15px;
+            background: rgba(224, 242, 254, 0.5);
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .config-toggle:hover {
+            background: rgba(219, 234, 254, 0.8);
+        }
+
+        .config-section {
+            background: rgba(240, 249, 255, 0.8);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-top: 25px;
+            display: none;
+            border: 1px dashed var(--primary);
+        }
+
+        .config-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .result-card {
+            text-align: center;
+            background: linear-gradient(135deg, rgba(219, 234, 254, 0.8), rgba(224, 242, 254, 0.9));
+            border: 2px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+            z-index: 0;
+        }
+
+        .result-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .result-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 20px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .result-detail {
+            font-size: 1.4rem;
+            color: var(--dark);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .highlight {
+            background: var(--warning);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);
+        }
+
+        .result-explanation {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 25px;
+            text-align: left;
+            font-size: 1rem;
+        }
+
+        .result-explanation h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .explanation-list {
+            list-style-type: none;
+        }
+
+        .explanation-list li {
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+            display: flex;
+        }
+
+        .explanation-list li:last-child {
+            border-bottom: none;
+        }
+
+        .explanation-list li i {
+            color: var(--success);
+            min-width: 24px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.15rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: width 0.5s;
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-calculate {
+            width: 100%;
+            margin-top: 15px;
+            padding: 16px;
+            font-size: 1.25rem;
+        }
+
+        .btn-reset {
+            background: var(--gray);
+            margin-top: 20px;
+            padding: 12px 25px;
+            box-shadow: 0 4px 8px rgba(100, 116, 139, 0.3);
+        }
+
+        .btn-reset:hover {
+            background: #475569;
+            box-shadow: 0 6px 12px rgba(71, 85, 105, 0.4);
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.95rem;
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .info-icon {
+            color: var(--gray);
+            cursor: help;
+            font-size: 1rem;
+            margin-left: 8px;
+            transition: var(--transition);
+        }
+
+        .info-icon:hover {
+            color: var(--primary);
+        }
+
+        .input-icon {
+            position: relative;
+        }
+
+        .input-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        .input-icon input {
+            padding-left: 45px;
+        }
+
+        @media (max-width: 768px) {
+            .input-row {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .input-field {
+                min-width: 100%;
+            }
+            
+            .radio-group, .checkbox-group {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .result-value {
+                font-size: 2.2rem;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 25px 20px;
+            }
+            
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 280px;
+            background-color: var(--dark);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 12px;
+            position: absolute;
+            z-index: 100;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+            font-weight: normal;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--light-gray);
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .discount-summary {
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 25px;
+            display: none;
+        }
+        
+        .discount-summary.active {
+            display: block;
+        }
+        
+        .discount-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+        }
+        
+        .discount-item:last-child {
+            border-bottom: none;
+        }
+        
+        .discount-total {
+            font-weight: 700;
+            color: var(--success);
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid var(--success);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-calculator"></i> 公司贷款利率测算工具</h1>
+            <p>基于LPR基准、担保方式、优惠条件和借款种类等多维度参数的专业测算工具</p>
+        </header>
+
+        <main>
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-sliders-h"></i> 基本参数设置</h2>
+                
+                <div class="form-group">
+                    <label>LPR当前执行情况</label>
+                    <div class="input-row">
+                        <div class="input-field input-icon">
+                            <i class="fas fa-chart-line"></i>
+                            <label>1年期LPR (%)</label>
+                            <input type="number" id="lpr1" step="0.01" min="0" max="20" value="3.0">
+                        </div>
+                        <div class="input-field input-icon">
+                            <i class="fas fa-chart-line"></i>
+                            <label>5年期LPR (%)</label>
+                            <input type="number" id="lpr5" step="0.01" min="0" max="20" value="3.5">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>借款额度</label>
+                    <div class="radio-group" id="amount-group">
+                        <div class="radio-option active" data-value="500">
+                            <i class="fas fa-coins"></i>
+                            <input type="radio" name="amount" value="500" checked>
+                            <span>500万元及以下</span>
+                        </div>
+                        <div class="radio-option" data-value="500+">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <input type="radio" name="amount" value="500+">
+                            <span>500万元以上</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>担保方式</label>
+                    <div class="radio-group" id="guarantee-group">
+                        <div class="radio-option active" data-value="credit">
+                            <i class="fas fa-handshake"></i>
+                            <input type="radio" name="guarantee" value="credit" checked>
+                            <span>信用类</span>
+                        </div>
+                        <div class="radio-option" data-value="guarantee">
+                            <i class="fas fa-user-shield"></i>
+                            <input type="radio" name="guarantee" value="guarantee">
+                            <span>保证类</span>
+                        </div>
+                        <div class="radio-option" data-value="mortgage">
+                            <i class="fas fa-home"></i>
+                            <input type="radio" name="guarantee" value="mortgage">
+                            <span>抵押类</span>
+                        </div>
+                        <div class="radio-option" data-value="pledge">
+                            <i class="fas fa-gem"></i>
+                            <input type="radio" name="guarantee" value="pledge">
+                            <span>质押类</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>借款种类</label>
+                    <div class="radio-group" id="loan-type-group">
+                        <div class="radio-option active" data-value="general">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <input type="radio" name="loan-type" value="general" checked>
+                            <span>一般借款</span>
+                        </div>
+                        <div class="radio-option" data-value="reissue">
+                            <i class="fas fa-sync-alt"></i>
+                            <input type="radio" name="loan-type" value="reissue">
+                            <span>原额度原担保收回再贷</span>
+                        </div>
+                        <div class="radio-option" data-value="renew">
+                            <i class="fas fa-redo"></i>
+                            <input type="radio" name="loan-type" value="renew">
+                            <span>续贷借新还旧债务重组贷款</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="original-rate-group" style="display: none; margin-top: 20px;">
+                    <div class="input-field input-icon">
+                        <i class="fas fa-percentage"></i>
+                        <label>原执行利率 (%)</label>
+                        <input type="number" id="original-rate" step="0.01" min="0" max="20" value="4.5">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>是否潜力客户</label>
+                    <div class="checkbox-group" id="potential-group">
+                        <div class="checkbox-option" data-value="potential">
+                            <i class="fas fa-star"></i>
+                            <input type="checkbox" id="potential">
+                            <span>是潜力客户（加50BP）</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-percentage"></i> 利率优惠设置</h2>
+                
+                <div class="form-group">
+                    <div class="input-row">
+                        <div class="input-field input-icon">
+                            <i class="fas fa-id-card"></i>
+                            <label>职工社保卡（张）<i class="fas fa-info-circle info-icon tooltip">
+                                <span class="tooltiptext">每张社保卡优惠1BP，最高50BP</span>
+                            </i></label>
+                            <input type="number" id="social-security" min="0" max="50" value="0">
+                            <div class="progress-bar">
+                                <div class="progress" id="social-progress"></div>
+                            </div>
+                        </div>
+                        <div class="input-field input-icon">
+                            <i class="fas fa-chart-pie"></i>
+                            <label>股金（万股）<i class="fas fa-info-circle info-icon tooltip">
+                                <span class="tooltiptext">每10万股优惠10BP，不足10万按10万整数倍计算，最高50BP</span>
+                            </i></label>
+                            <input type="number" id="shares" min="0" max="50" step="10" value="0">
+                            <div class="progress-bar">
+                                <div class="progress" id="shares-progress"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="input-row">
+                        <div class="input-field input-icon">
+                            <i class="fas fa-piggy-bank"></i>
+                            <label>资金留存（日均万元）<i class="fas fa-info-circle info-icon tooltip">
+                                <span class="tooltiptext">每日均1万元优惠1BP，最高50BP</span>
+                            </i></label>
+                            <input type="number" id="deposit" min="0" max="50" value="0">
+                            <div class="progress-bar">
+                                <div class="progress" id="deposit-progress"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>基本代发</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-option" data-value="basic-account">
+                            <i class="fas fa-building"></i>
+                            <input type="checkbox" id="basic-account">
+                            <span>开立基本户（优惠30BP）</span>
+                        </div>
+                        <div class="checkbox-option" data-value="payroll">
+                            <i class="fas fa-money-check"></i>
+                            <input type="checkbox" id="payroll">
+                            <span>签约代发工资（优惠20BP）</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>渠道业务</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-option" data-value="aggregate-payment">
+                            <i class="fas fa-qrcode"></i>
+                            <input type="checkbox" id="aggregate-payment">
+                            <span>开通聚合支付（优惠20BP）</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="input-row">
+                        <div class="input-field">
+                            <label>当前优惠总计（BP）</label>
+                            <input type="text" id="total-discount" value="0" readonly style="background-color: rgba(16, 185, 129, 0.1); font-weight: 700; color: var(--success);">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="discount-summary" id="discount-summary">
+                    <h3><i class="fas fa-file-alt"></i> 优惠明细</h3>
+                    <div class="discount-item">
+                        <span>职工社保卡优惠：</span>
+                        <span id="social-discount">0 BP</span>
+                    </div>
+                    <div class="discount-item">
+                        <span>股金优惠：</span>
+                        <span id="shares-discount">0 BP</span>
+                    </div>
+                    <div class="discount-item">
+                        <span>资金留存优惠：</span>
+                        <span id="deposit-discount">0 BP</span>
+                    </div>
+                    <div class="discount-item">
+                        <span>基本代发优惠：</span>
+                        <span id="basic-discount">0 BP</span>
+                    </div>
+                    <div class="discount-item">
+                        <span>渠道业务优惠：</span>
+                        <span id="channel-discount">0 BP</span>
+                    </div>
+                    <div class="discount-total">
+                        <span>优惠总计：</span>
+                        <span id="total-discount-display">0 BP</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card result-card">
+                <div class="result-content">
+                    <h2 class="card-title"><i class="fas fa-chart-line"></i> 测算结果</h2>
+                    <div class="result-detail">执行利率为：LPR <span id="lpr-plus-minus" class="highlight">±0</span> 基点</div>
+                    <div class="result-value" id="final-rate">0.00%</div>
+                    <p>基于当前参数计算的最终执行年利率</p>
+                    
+                    <button class="btn btn-calculate" id="calculate-btn">
+                        <i class="fas fa-calculator"></i> 计算贷款利率
+                    </button>
+                    
+                    <button class="btn btn-reset" id="reset-btn">
+                        <i class="fas fa-redo"></i> 重置参数
+                    </button>
+                </div>
+                
+                <div class="result-explanation">
+                    <h3><i class="fas fa-lightbulb"></i> 利率计算说明</h3>
+                    <ul class="explanation-list">
+                        <li><i class="fas fa-check-circle"></i> 3年期以下贷款挂钩1年期LPR，3年期以上挂钩5年期LPR</li>
+                        <li><i class="fas fa-check-circle"></i> 质押类贷款最低利率不低于同档次LPR</li>
+                        <li><i class="fas fa-check-circle"></i> 优惠累计上限为100BP，各分项也有上限</li>
+                        <li><i class="fas fa-check-circle"></i> 潜力客户需额外增加50BP</li>
+                        <li><i class="fas fa-check-circle"></i> 特殊借款种类按特定规则重新计算</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-cog"></i> 高级配置 <span class="config-toggle" id="config-toggle"><i class="fas fa-chevron-down"></i> 显示配置选项</span></h2>
+                
+                <div class="config-section" id="config-section">
+                    <div class="config-grid">
+                        <div class="input-field">
+                            <label>社保卡优惠上限（BP）</label>
+                            <input type="number" id="max-social" min="0" max="200" value="50">
+                        </div>
+                        <div class="input-field">
+                            <label>基本代发优惠上限（BP）</label>
+                            <input type="number" id="max-basic" min="0" max="200" value="50">
+                        </div>
+                        <div class="input-field">
+                            <label>渠道业务优惠上限（BP）</label>
+                            <input type="number" id="max-channel" min="0" max="200" value="20">
+                        </div>
+                        <div class="input-field">
+                            <label>股金优惠上限（BP）</label>
+                            <input type="number" id="max-shares" min="0" max="200" value="50">
+                        </div>
+                        <div class="input-field">
+                            <label>资金留存优惠上限（BP）</label>
+                            <input type="number" id="max-deposit" min="0" max="200" value="50">
+                        </div>
+                        <div class="input-field">
+                            <label>累计优惠上限（BP）</label>
+                            <input type="number" id="max-total-discount" min="0" max="200" value="100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <div class="footer-note">
+            <p>注：本测算工具结果仅供参考，实际执行利率以最终审批结果为准</p>
+            <p>© 2023 公司金融服务中心 | 利率测算工具 v2.0</p>
+        </div>
+    </div>
+
+    <script>
+        // DOM元素
+        const configToggle = document.getElementById('config-toggle');
+        const configSection = document.getElementById('config-section');
+        const calculateBtn = document.getElementById('calculate-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const loanTypeGroup = document.getElementById('loan-type-group');
+        const originalRateGroup = document.getElementById('original-rate-group');
+        const totalDiscountInput = document.getElementById('total-discount');
+        const discountSummary = document.getElementById('discount-summary');
+        
+        // 单选按钮组
+        const radioGroups = document.querySelectorAll('.radio-group');
+        const checkboxGroups = document.querySelectorAll('.checkbox-group');
+        
+        // 初始化单选按钮组交互
+        radioGroups.forEach(group => {
+            const options = group.querySelectorAll('.radio-option');
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    options.forEach(opt => opt.classList.remove('active'));
+                    option.classList.add('active');
+                    const radio = option.querySelector('input[type="radio"]');
+                    radio.checked = true;
+                    
+                    // 显示/隐藏原执行利率输入
+                    if (radio.name === 'loan-type' && 
+                        (radio.value === 'reissue' || radio.value === 'renew')) {
+                        originalRateGroup.style.display = 'block';
+                    } else {
+                        originalRateGroup.style.display = 'none';
+                    }
+                    
+                    // 重新计算
+                    calculateDiscount();
+                });
+            });
+        });
+        
+        // 初始化复选框组交互
+        checkboxGroups.forEach(group => {
+            const options = group.querySelectorAll('.checkbox-option');
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    option.classList.toggle('active');
+                    const checkbox = option.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+                    calculateDiscount();
+                });
+            });
+        });
+        
+        // 配置面板切换
+        configToggle.addEventListener('click', () => {
+            const isActive = configSection.classList.toggle('active');
+            configToggle.innerHTML = isActive ? 
+                '<i class="fas fa-chevron-up"></i> 隐藏配置选项' : 
+                '<i class="fas fa-chevron-down"></i> 显示配置选项';
+        });
+        
+        // 优惠计算
+        function calculateDiscount() {
+            // 获取优惠参数
+            const socialSecurity = parseInt(document.getElementById('social-security').value) || 0;
+            const shares = parseInt(document.getElementById('shares').value) || 0;
+            const deposit = parseInt(document.getElementById('deposit').value) || 0;
+            const basicAccount = document.getElementById('basic-account').checked;
+            const payroll = document.getElementById('payroll').checked;
+            const aggregatePayment = document.getElementById('aggregate-payment').checked;
+            
+            // 获取优惠上限配置
+            const maxSocial = parseInt(document.getElementById('max-social').value) || 50;
+            const maxBasic = parseInt(document.getElementById('max-basic').value) || 50;
+            const maxChannel = parseInt(document.getElementById('max-channel').value) || 20;
+            const maxShares = parseInt(document.getElementById('max-shares').value) || 50;
+            const maxDeposit = parseInt(document.getElementById('max-deposit').value) || 50;
+            const maxTotalDiscount = parseInt(document.getElementById('max-total-discount').value) || 100;
+            
+            // 计算各项优惠
+            let discount = 0;
+            let socialDiscount = 0;
+            let shareDiscount = 0;
+            let depositDiscount = 0;
+            let basicDiscount = 0;
+            let channelDiscount = 0;
+            
+            // 职工社保卡优惠
+            socialDiscount = Math.min(socialSecurity, maxSocial);
+            discount += socialDiscount;
+            
+            // 更新进度条
+            document.getElementById('social-progress').style.width = `${(socialDiscount/maxSocial)*100}%`;
+            
+            // 股金优惠（每10万股优惠10BP）
+            shareDiscount = Math.floor(shares / 10) * 10;
+            shareDiscount = Math.min(shareDiscount, maxShares);
+            discount += shareDiscount;
+            
+            // 更新进度条
+            document.getElementById('shares-progress').style.width = `${(shareDiscount/maxShares)*100}%`;
+            
+            // 资金留存优惠
+            depositDiscount = Math.min(deposit, maxDeposit);
+            discount += depositDiscount;
+            
+            // 更新进度条
+            document.getElementById('deposit-progress').style.width = `${(depositDiscount/maxDeposit)*100}%`;
+            
+            // 基本代发优惠
+            if (basicAccount) basicDiscount += 30;
+            if (payroll) basicDiscount += 20;
+            basicDiscount = Math.min(basicDiscount, maxBasic);
+            discount += basicDiscount;
+            
+            // 渠道业务优惠
+            if (aggregatePayment) {
+                channelDiscount = Math.min(20, maxChannel);
+                discount += channelDiscount;
+            }
+            
+            // 应用总优惠上限
+            discount = Math.min(discount, maxTotalDiscount);
+            
+            // 更新总优惠显示
+            totalDiscountInput.value = discount;
+            
+            // 更新优惠明细
+            document.getElementById('social-discount').textContent = `${socialDiscount} BP`;
+            document.getElementById('shares-discount').textContent = `${shareDiscount} BP`;
+            document.getElementById('deposit-discount').textContent = `${depositDiscount} BP`;
+            document.getElementById('basic-discount').textContent = `${basicDiscount} BP`;
+            document.getElementById('channel-discount').textContent = `${channelDiscount} BP`;
+            document.getElementById('total-discount-display').textContent = `${discount} BP`;
+            
+            // 显示优惠明细
+            discountSummary.classList.add('active');
+            
+            return discount;
+        }
+        
+        // 计算利率
+        function calculateRate() {
+            // 获取基本参数
+            const lpr1 = parseFloat(document.getElementById('lpr1').value) || 3.0;
+            const lpr5 = parseFloat(document.getElementById('lpr5').value) || 3.5;
+            const amount = document.querySelector('input[name="amount"]:checked').value;
+            const guarantee = document.querySelector('input[name="guarantee"]:checked').value;
+            const loanType = document.querySelector('input[name="loan-type"]:checked').value;
+            const originalRate = parseFloat(document.getElementById('original-rate').value) || 0;
+            const isPotential = document.getElementById('potential').checked;
+            
+            // 计算优惠
+            const discount = calculateDiscount();
+            
+            // 计算基础利率（未优惠前）
+            let baseRate = 0;
+            let baseBp = 0;
+            
+            if (guarantee === 'pledge') {
+                // 质押类固定执行3.5%
+                baseRate = 3.5;
+            } else {
+                // 其他担保方式
+                if (amount === '500') {
+                    // 500万元及以下
+                    switch(guarantee) {
+                        case 'credit': baseBp = 300; break;
+                        case 'guarantee': baseBp = 250; break;
+                        case 'mortgage': baseBp = 150; break; // 保证类降100BP
+                    }
+                } else {
+                    // 500万元以上
+                    switch(guarantee) {
+                        case 'credit': baseBp = 350; break;
+                        case 'guarantee': baseBp = 300; break;
+                        case 'mortgage': baseBp = 200; break; // 保证类降100BP
+                    }
+                }
+                
+                // 确定挂钩的LPR（假设贷款期限大于3年使用5年期LPR）
+                const lpr = lpr5;
+                baseRate = lpr + baseBp / 100;
+            }
+            
+            // 应用优惠
+            let finalRate = baseRate - discount / 100;
+            
+            // 潜力客户加50BP
+            if (isPotential) {
+                finalRate += 0.5;
+            }
+            
+            // 质押类最低不低于同档次LPR
+            if (guarantee === 'pledge') {
+                finalRate = Math.max(finalRate, lpr5);
+            }
+            
+            // 根据借款种类调整
+            if (loanType === 'reissue') {
+                // 原额度原担保收回再贷：取(原利率+0.5%)和计算结果的较小值
+                const reissueRate = originalRate + 0.5;
+                finalRate = Math.min(finalRate, reissueRate);
+            } else if (loanType === 'renew') {
+                // 续贷借新还旧债务重组贷款：原利率优惠1%
+                finalRate = originalRate * 0.99;
+            }
+            
+            // 确定挂钩的LPR档次
+            const lprUsed = lpr5; // 根据规则，3年以上使用5年期LPR
+            
+            // 计算相对于LPR的基点加减
+            const bp = Math.round((finalRate - lprUsed) * 100);
+            
+            // 更新结果
+            document.getElementById('lpr-plus-minus').textContent = 
+                bp >= 0 ? `+${bp}` : `${bp}`;
+            document.getElementById('final-rate').textContent = 
+                finalRate.toFixed(2) + '%';
+            
+            // 添加动画效果
+            const resultElement = document.getElementById('final-rate');
+            resultElement.style.transition = 'transform 0.5s, color 0.5s';
+            resultElement.style.transform = 'scale(1.1)';
+            resultElement.style.color = '#1d4ed8';
+            
+            setTimeout(() => {
+                resultElement.style.transform = 'scale(1)';
+                resultElement.style.color = '';
+            }, 500);
+        }
+        
+        // 重置表单
+        function resetForm() {
+            // 重置输入值
+            document.getElementById('lpr1').value = 3.0;
+            document.getElementById('lpr5').value = 3.5;
+            document.getElementById('social-security').value = 0;
+            document.getElementById('shares').value = 0;
+            document.getElementById('deposit').value = 0;
+            document.getElementById('basic-account').checked = false;
+            document.getElementById('payroll').checked = false;
+            document.getElementById('aggregate-payment').checked = false;
+            document.getElementById('potential').checked = false;
+            document.getElementById('original-rate').value = 4.5;
+            
+            // 重置单选按钮状态
+            const defaultOptions = document.querySelectorAll('.radio-option.active');
+            defaultOptions.forEach(option => {
+                option.classList.remove('active');
+            });
+            
+            document.querySelector('.radio-option[data-value="500"]').classList.add('active');
+            document.querySelector('.radio-option[data-value="credit"]').classList.add('active');
+            document.querySelector('.radio-option[data-value="general"]').classList.add('active');
+            
+            // 重置复选框状态
+            document.querySelectorAll('.checkbox-option.active').forEach(option => {
+                option.classList.remove('active');
+            });
+            
+            // 重置结果
+            document.getElementById('lpr-plus-minus').textContent = '±0';
+            document.getElementById('final-rate').textContent = '0.00%';
+            document.getElementById('total-discount').value = '0';
+            
+            // 隐藏原执行利率输入
+            originalRateGroup.style.display = 'none';
+            
+            // 重置进度条
+            document.getElementById('social-progress').style.width = '0%';
+            document.getElementById('shares-progress').style.width = '0%';
+            document.getElementById('deposit-progress').style.width = '0%';
+            
+            // 隐藏优惠明细
+            discountSummary.classList.remove('active');
+        }
+        
+        // 事件监听
+        calculateBtn.addEventListener('click', calculateRate);
+        resetBtn.addEventListener('click', resetForm);
+        
+        // 优惠参数变化时重新计算优惠
+        const discountInputs = [
+            'social-security', 'shares', 'deposit', 
+            'basic-account', 'payroll', 'aggregate-payment',
+            'max-social', 'max-shares', 'max-deposit', 
+            'max-basic', 'max-channel', 'max-total-discount'
+        ];
+        
+        discountInputs.forEach(id => {
+            const element = document.getElementById(id);
+            if (element.type === 'checkbox') {
+                element.addEventListener('change', calculateDiscount);
+            } else {
+                element.addEventListener('input', calculateDiscount);
+            }
+        });
+        
+        // 初始化页面
+        resetForm();
+    </script>
+</body>
+</html>

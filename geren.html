@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>利率测算工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        neutral: '#F3F4F6',
+                        dark: '#1F2937'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }
+            .input-focus {
+                @apply focus:ring-2 focus:ring-primary/50 focus:border-primary;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 页面标题 -->
+        <header class="mb-8">
+            <h1 class="text-[clamp(1.75rem,3vw,2.5rem)] font-bold text-dark mb-2">利率测算工具</h1>
+            <p class="text-gray-600 max-w-3xl">根据LPR基准及客户类型计算最终执行利率，支持灵活配置优惠参数</p>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- 配置模块 -->
+            <section class="lg:col-span-1">
+                <div class="bg-white rounded-xl p-6 card-shadow transition-all duration-300 hover:shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <i class="fa fa-cog text-primary text-xl mr-3"></i>
+                        <h2 class="text-xl font-semibold text-dark">参数配置</h2>
+                    </div>
+                    
+                    <!-- LPR配置 -->
+                    <div class="mb-6 pb-6 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-700 mb-4">LPR基础利率(%)</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <label for="lpr-1y" class="text-gray-600">一年期LPR</label>
+                                <div class="flex items-center w-36">
+                                    <input type="number" id="lpr-1y" value="3.0" min="0" step="0.01" 
+                                        class="w-full rounded-md border-gray-300 shadow-sm input-focus text-right">
+                                    <span class="ml-2 text-gray-500">%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label for="lpr-5y" class="text-gray-600">五年期LPR</label>
+                                <div class="flex items-center w-36">
+                                    <input type="number" id="lpr-5y" value="3.5" min="0" step="0.01" 
+                                        class="w-full rounded-md border-gray-300 shadow-sm input-focus text-right">
+                                    <span class="ml-2 text-gray-500">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 优惠配置 -->
+                    <div class="mb-6 pb-6 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-700 mb-4">优惠参数配置</h3>
+                        <div class="space-y-4">
+                            <div class="flex flex-col">
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="text-gray-600">社保卡优惠</label>
+                                    <div class="flex items-center">
+                                        <span class="text-sm text-gray-500 mr-2">每卡:</span>
+                                        <div class="flex items-center w-24">
+                                            <input type="number" id="card-discount-rate" value="10" min="0" step="1" 
+                                                class="w-full rounded-md border-gray-300 shadow-sm input-focus text-right">
+                                            <span class="ml-2 text-gray-500">BP</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-500">上限:</span>
+                                    <div class="flex items-center w-24">
+                                        <input type="number" id="card-discount-max" value="50" min="0" step="1" 
+                                            class="w-full rounded-md border-gray-300 shadow-sm input-focus text-right">
+                                        <span class="ml-2 text-gray-500">BP</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col">
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="text-gray-600">股金优惠</label>
+                                    <div class="flex items-center">
+                                        <span class="text-sm text-gray-500 mr-2">每10万股:</span>
+                                        <div class="flex items-center w-24">
+                                            <input type="number" id="stock-discount-rate" value="10" min="0" step="1" 
+                                                class="w-full rounded-md border-gray-300 shadow-sm input-focus text-right">
+                                            <span class="ml-2 text-gray-500">BP</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-500">上限:</span>
+                                    <div class="flex items-center w-24">
+                                        <input type="number" id="stock-discount-max" value="50" min="0" step="1" 
+                                            class="w-full rounded-md border-gray-300 shadow-sm input-focus text-right">
+                                        <span class="ml-2 text-gray-500">BP</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col">
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="text-gray-600">渠道业务优惠</label>
+                                    <div class="flex items-center">
+                                        <span class="text-sm text-gray-500 mr-2">手机银行每户:</span>
+                                        <div class="flex items-center w-24">
+                                            <input type="number" id="channel-mobile-rate" value="10" min="0" step="1" 
+                                                class="w-full rounded-md border-gray-300 shadow-sm input-focus text-right">
+                                            <span class="ml-2 text-gray-500">BP</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm text-gray-500 mr-2">聚合支付:</span>
+                                    <div class="flex items-center w-24">
+                                        <input type="number" id="channel-payment-rate" value="20" min="0" step="1" 
+                                            class="w-full rounded-md border-gray-300 shadow-sm input-focus text-right">
+                                            <span class="ml-2 text-gray-500">BP</span>
+                                        </div>
+                                    </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-500">上限:</span>
+                                    <div class="flex items-center w-24">
+                                        <input type="number" id="channel-discount-max" value="20" min="0" step="1" 
+                                            class="w-full rounded-md border-gray-300 shadow-sm input-focus text-right">
+                                        <span class="ml-2 text-gray-500">BP</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col">
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="text-gray-600">资金留存优惠</label>
+                                    <div class="flex items-center">
+                                        <span class="text-sm text-gray-500 mr-2">每万元:</span>
+                                        <div class="flex items-center w-24">
+                                            <input type="number" id="fund-discount-rate" value="1" min="0" step="0.1" 
+                                                class="w-full rounded-md border-gray-300 shadow-sm input-focus text-right">
+                                            <span class="ml-2 text-gray-500">BP</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-500">上限:</span>
+                                    <div class="flex items-center w-24">
+                                        <input type="number" id="fund-discount-max" value="50" min="0" step="1" 
+                                            class="w-full rounded-md border-gray-300 shadow-sm input-focus text-right">
+                                        <span class="ml-2 text-gray-500">BP</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <label class="text-gray-600">累计优惠上限</label>
+                                <div class="flex items-center w-24">
+                                    <input type="number" id="total-discount-max" value="100" min="0" step="1" 
+                                        class="w-full rounded-md border-gray-300 shadow-sm input-focus text-right">
+                                    <span class="ml-2 text-gray-500">BP</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 浮动配置 -->
+                    <div class="mb-6 pb-6 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-700 mb-4">浮动参数配置</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <label class="text-gray-600">潜力客户加点</label>
+                                <div class="flex items-center w-24">
+                                    <input type="number" id="potential-add-rate" value="50" min="0" step="1" 
+                                        class="w-full rounded-md border-gray-300 shadow-sm input-focus text-right">
+                                    <span class="ml-2 text-gray-500">BP</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label class="text-gray-600">原额度原担保加点</label>
+                                <div class="flex items-center w-24">
+                                    <input type="number" id="reloan-add-rate" value="50" min="0" step="1" 
+                                        class="w-full rounded-md border-gray-300 shadow-sm input-focus text-right">
+                                    <span class="ml-2 text-gray-500">BP</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label class="text-gray-600">续贷优惠比例</label>
+                                <div class="flex items-center w-24">
+                                    <input type="number" id="renew-discount-rate" value="1" min="0" step="0.1" 
+                                        class="w-full rounded-md border-gray-300 shadow-sm input-focus text-right">
+                                    <span class="ml-2 text-gray-500">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 保存配置按钮 -->
+                    <button id="save-config" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center">
+                        <i class="fa fa-save mr-2"></i> 保存配置
+                    </button>
+                </div>
+            </section>
+            
+            <!-- 计算模块 -->
+            <section class="lg:col-span-2">
+                <div class="bg-white rounded-xl p-6 card-shadow transition-all duration-300 hover:shadow-lg">
+                    <div class="flex items-center mb-6">
+                        <i class="fa fa-calculator text-primary text-xl mr-3"></i>
+                        <h2 class="text-xl font-semibold text-dark">利率计算</h2>
+                    </div>
+                    
+                    <!-- 基本信息 -->
+                    <div class="mb-6 pb-6 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-700 mb-4">客户基本信息</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="customer-type" class="block text-sm font-medium text-gray-700 mb-1">客户类型</label>
+                                <select id="customer-type" class="w-full rounded-md border-gray-300 shadow-sm input-focus">
+                                    <option value="personal">个人客户</option>
+                                    <option value="company">公司客户(小微企业主)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="loan-amount" class="block text-sm font-medium text-gray-700 mb-1">借款金额(万元)</label>
+                                <input type="number" id="loan-amount" value="50" min="0" step="0.01" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm input-focus">
+                            </div>
+                            <div id="personal-customer-type-group" class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">个人客户分类</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div class="flex items-center">
+                                        <input type="radio" id="personal-type-normal" name="personal-type" value="normal" checked 
+                                            class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                        <label for="personal-type-normal" class="ml-2 block text-sm text-gray-700">一般客户</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="radio" id="personal-type-vip" name="personal-type" value="vip" 
+                                            class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                        <label for="personal-type-vip" class="ml-2 block text-sm text-gray-700">高端客户</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="radio" id="personal-type-other" name="personal-type" value="other" 
+                                            class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                        <label for="personal-type-other" class="ml-2 block text-sm text-gray-700">其他优质客户</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="loan-term-group" class="md:col-span-2">
+                                <label for="loan-term" class="block text-sm font-medium text-gray-700 mb-1">借款期限(年)</label>
+                                <input type="number" id="loan-term" value="1" min="0.1" step="0.1" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm input-focus">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 优惠信息 -->
+                    <div class="mb-6 pb-6 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-700 mb-4">优惠信息</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="social-card-count" class="block text-sm font-medium text-gray-700 mb-1">社保卡数量(张)</label>
+                                <input type="number" id="social-card-count" value="0" min="0" step="1" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm input-focus">
+                            </div>
+                            <div>
+                                <label for="stock-amount" class="block text-sm font-medium text-gray-700 mb-1">股金数量(万股)</label>
+                                <input type="number" id="stock-amount" value="0" min="0" step="0.1" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm input-focus">
+                            </div>
+                            <div>
+                                <label for="mobile-bank-count" class="block text-sm font-medium text-gray-700 mb-1">手机银行开通数(户)</label>
+                                <input type="number" id="mobile-bank-count" value="0" min="0" step="1" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm input-focus">
+                            </div>
+                            <div>
+                                <label for="payment-channel" class="block text-sm font-medium text-gray-700 mb-1">聚合支付</label>
+                                <select id="payment-channel" class="w-full rounded-md border-gray-300 shadow-sm input-focus">
+                                    <option value="0">未开通</option>
+                                    <option value="1">已开通</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="fund-amount" class="block text-sm font-medium text-gray-700 mb-1">资金留存(万元)</label>
+                                <input type="number" id="fund-amount" value="0" min="0" step="0.01" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm input-focus">
+                            </div>
+                            <div>
+                                <label for="collateral-type" class="block text-sm font-medium text-gray-700 mb-1">担保方式</label>
+                                <select id="collateral-type" class="w-full rounded-md border-gray-300 shadow-sm input-focus">
+                                    <option value="none">无</option>
+                                    <option value="mortgage">足值抵押</option>
+                                    <option value="pledge">足值质押</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="is-potential-customer" value="1" 
+                                        class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                    <label for="is-potential-customer" class="ml-2 block text-sm text-gray-700">是否为潜力客户</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 借款种类 -->
+                    <div class="mb-6 pb-6 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-700 mb-4">借款种类</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <input type="radio" id="loan-type-normal" name="loan-type" value="normal" checked 
+                                    class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                <label for="loan-type-normal" class="ml-2 block text-sm text-gray-700">一般借款</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="loan-type-reloan" name="loan-type" value="reloan" 
+                                    class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                <label for="loan-type-reloan" class="ml-2 block text-sm text-gray-700">原额度原担保收回再贷</label>
+                            </div>
+                            <div id="original-rate-reloan-group" class="ml-6 hidden">
+                                <label for="original-rate-reloan" class="block text-sm font-medium text-gray-700 mb-1">原执行利率(%)</label>
+                                <input type="number" id="original-rate-reloan" value="0" min="0" step="0.01" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm input-focus">
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="loan-type-renew" name="loan-type" value="renew" 
+                                    class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                <label for="loan-type-renew" class="ml-2 block text-sm text-gray-700">续贷/借新还旧/债务重组贷款</label>
+                            </div>
+                            <div id="original-rate-renew-group" class="ml-6 hidden">
+                                <label for="original-rate-renew" class="block text-sm font-medium text-gray-700 mb-1">原执行利率(%)</label>
+                                <input type="number" id="original-rate-renew" value="0" min="0" step="0.01" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm input-focus">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 计算按钮 -->
+                    <div class="flex justify-center">
+                        <button id="calculate-btn" class="bg-secondary hover:bg-secondary/90 text-white font-medium py-3 px-8 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center">
+                            <i class="fa fa-calculator mr-2"></i> 计算利率
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 计算结果 -->
+                <div id="result-section" class="mt-6 bg-white rounded-xl p-6 card-shadow transition-all duration-300 opacity-0 transform translate-y-4">
+                    <div class="flex items-center mb-4">
+                        <i class="fa fa-bar-chart text-primary text-xl mr-3"></i>
+                        <h2 class="text-xl font-semibold text-dark">计算结果</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-neutral rounded-lg p-4">
+                            <h3 class="text-base font-medium text-gray-700 mb-2">基础信息</h3>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">客户类型:</span>
+                                    <span id="result-customer-type" class="font-medium">个人客户-一般客户</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">借款金额:</span>
+                                    <span id="result-loan-amount" class="font-medium">50万元</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">借款期限:</span>
+                                    <span id="result-loan-term" class="font-medium">1年</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">适用LPR:</span>
+                                    <span id="result-lpr-type" class="font-medium">一年期LPR</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">LPR利率:</span>
+                                    <span id="result-lpr-rate" class="font-medium">3.00%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-neutral rounded-lg p-4">
+                            <h3 class="text-base font-medium text-gray-700 mb-2">利率计算</h3>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">未优惠前利率:</span>
+                                    <span id="result-base-rate" class="font-medium">6.50% (LPR+350BP)</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">累计优惠幅度:</span>
+                                    <span id="result-discount" class="font-medium">-0.00% (-0BP)</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">潜力客户加点:</span>
+                                    <span id="result-potential-add" class="font-medium">+0.00% (+0BP)</span>
+                                </div>
+                                <div class="flex justify-between text-primary">
+                                    <span class="font-medium">执行利率:</span>
+                                    <span id="result-final-rate" class="font-bold text-xl">6.50%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 优惠明细 -->
+                    <div class="mt-6 bg-neutral rounded-lg p-4">
+                        <h3 class="text-base font-medium text-gray-700 mb-3">优惠明细</h3>
+                        <div id="discount-details" class="text-sm">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">社保卡优惠:</span>
+                                    <span id="detail-card-discount" class="font-medium">-0.00% (-0BP)</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">股金优惠:</span>
+                                    <span id="detail-stock-discount" class="font-medium">-0.00% (-0BP)</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">渠道业务优惠:</span>
+                                    <span id="detail-channel-discount" class="font-medium">-0.00% (-0BP)</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">资金留存优惠:</span>
+                                    <span id="detail-fund-discount" class="font-medium">-0.00% (-0BP)</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">担保方式优惠:</span>
+                                    <span id="detail-collateral-discount" class="font-medium">-0.00% (-0BP)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const customerTypeSelect = document.getElementById('customer-type');
+            const personalCustomerTypeGroup = document.getElementById('personal-customer-type-group');
+            const loanTypeRadios = document.querySelectorAll('input[name="loan-type"]');
+            const originalRateReloanGroup = document.getElementById('original-rate-reloan-group');
+            const originalRateRenewGroup = document.getElementById('original-rate-renew-group');
+            const calculateBtn = document.getElementById('calculate-btn');
+            const resultSection = document.getElementById('result-section');
+            const saveConfigBtn = document.getElementById('save-config');
+            
+            // 客户类型变更事件
+            customerTypeSelect.addEventListener('change', function() {
+                if (this.value === 'personal') {
+                    personalCustomerTypeGroup.classList.remove('hidden');
+                    personalCustomerTypeGroup.classList.add('md:col-span-2');
+                } else {
+                    personalCustomerTypeGroup.classList.add('hidden');
+                    personalCustomerTypeGroup.classList.remove('md:col-span-2');
+                }
+            });
+            
+            // 借款种类变更事件
+            loanTypeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'reloan') {
+                        originalRateReloanGroup.classList.remove('hidden');
+                        originalRateRenewGroup.classList.add('hidden');
+                    } else if (this.value === 'renew') {
+                        originalRateReloanGroup.classList.add('hidden');
+                        originalRateRenewGroup.classList.remove('hidden');
+                    } else {
+                        originalRateReloanGroup.classList.add('hidden');
+                        originalRateRenewGroup.classList.add('hidden');
+                    }
+                });
+            });
+            
+            // 保存配置按钮点击事件
+            saveConfigBtn.addEventListener('click', function() {
+                // 显示保存成功的提示
+                showNotification('配置保存成功', 'success');
+            });
+            
+            // 计算按钮点击事件
+            calculateBtn.addEventListener('click', calculateInterestRate);
+            
+            // 计算利率函数
+            function calculateInterestRate() {
+                // 获取基础数据
+                const lpr1y = parseFloat(document.getElementById('lpr-1y').value);
+                const lpr5y = parseFloat(document.getElementById('lpr-5y').value);
+                const loanAmount = parseFloat(document.getElementById('loan-amount').value);
+                const loanTerm = parseFloat(document.getElementById('loan-term').value);
+                
+                // 确定适用的LPR
+                const applicableLPR = loanTerm <= 3 ? lpr1y : lpr5y;
+                const applicableLPRType = loanTerm <= 3 ? '一年期LPR' : '五年期LPR';
+                
+                // 获取客户类型相关信息
+                let baseRate = 0;
+                let baseRateBP = 0;
+                let customerTypeText = '';
+                
+                if (customerTypeSelect.value === 'personal') {
+                    // 个人客户
+                    const personalType = document.querySelector('input[name="personal-type"]:checked').value;
+                    
+                    if (personalType === 'normal') {
+                        customerTypeText = '个人客户-一般客户';
+                        baseRateBP = loanAmount <= 50 ? 350 : 400;
+                    } else if (personalType === 'vip') {
+                        customerTypeText = '个人客户-高端客户';
+                        baseRateBP = loanAmount <= 50 ? 50 : 100;
+                    } else {
+                        customerTypeText = '个人客户-其他优质客户';
+                        baseRateBP = loanAmount <= 50 ? 100 : 150;
+                    }
+                } else {
+                    // 公司客户(小微企业主)
+                    customerTypeText = '公司客户(小微企业主)';
+                    baseRateBP = loanAmount <= 200 ? 300 : 350;
+                }
+                
+                // 计算未优惠前的利率
+                baseRate = applicableLPR + (baseRateBP / 100);
+                
+                // 计算各项优惠
+                const cardCount = parseInt(document.getElementById('social-card-count').value);
+                const stockAmount = parseFloat(document.getElementById('stock-amount').value);
+                const mobileBankCount = parseInt(document.getElementById('mobile-bank-count').value);
+                const paymentChannel = parseInt(document.getElementById('payment-channel').value);
+                const fundAmount = parseFloat(document.getElementById('fund-amount').value);
+                const collateralType = document.getElementById('collateral-type').value;
+                const isPotentialCustomer = document.getElementById('is-potential-customer').checked;
+                
+                // 获取优惠配置参数
+                const cardDiscountRate = parseInt(document.getElementById('card-discount-rate').value);
+                const cardDiscountMax = parseInt(document.getElementById('card-discount-max').value);
+                const stockDiscountRate = parseInt(document.getElementById('stock-discount-rate').value);
+                const stockDiscountMax = parseInt(document.getElementById('stock-discount-max').value);
+                const channelMobileRate = parseInt(document.getElementById('channel-mobile-rate').value);
+                const channelPaymentRate = parseInt(document.getElementById('channel-payment-rate').value);
+                const channelDiscountMax = parseInt(document.getElementById('channel-discount-max').value);
+                const fundDiscountRate = parseFloat(document.getElementById('fund-discount-rate').value);
+                const fundDiscountMax = parseInt(document.getElementById('fund-discount-max').value);
+                const totalDiscountMax = parseInt(document.getElementById('total-discount-max').value);
+                const potentialAddRate = parseInt(document.getElementById('potential-add-rate').value);
+                const reloanAddRate = parseInt(document.getElementById('reloan-add-rate').value);
+                const renewDiscountRate = parseFloat(document.getElementById('renew-discount-rate').value);
+                
+                // 计算各项优惠BP
+                let cardDiscountBP = Math.min(cardCount * cardDiscountRate, cardDiscountMax);
+                let stockDiscountBP = Math.min(Math.floor(stockAmount / 10) * stockDiscountRate, stockDiscountMax);
+                let channelDiscountBP = Math.min(mobileBankCount * channelMobileRate + paymentChannel * channelPaymentRate, channelDiscountMax);
+                let fundDiscountBP = Math.min(fundAmount * fundDiscountRate, fundDiscountMax);
+                
+                // 计算总优惠BP (不包含担保方式优惠)
+                let totalDiscountBP = cardDiscountBP + stockDiscountBP + channelDiscountBP + fundDiscountBP;
+                // 应用总优惠上限
+                totalDiscountBP = Math.min(totalDiscountBP, totalDiscountMax);
+                
+                // 处理担保方式优惠
+                let collateralDiscountBP = 0;
+                let collateralDiscountText = '';
+                
+                if (collateralType === 'mortgage') {
+                    collateralDiscountBP = 100;
+                    collateralDiscountText = '足值抵押(-100BP)';
+                } else if (collateralType === 'pledge') {
+                    // 足值质押直接执行3.5%
+                    baseRate = 3.5;
+                    baseRateBP = (3.5 - applicableLPR) * 100;
+                    collateralDiscountText = '足值质押(执行3.5%)';
+                }
+                
+                // 计算潜力客户加点
+                const potentialAddBP = isPotentialCustomer ? potentialAddRate : 0;
+                
+                // 计算最终利率
+                let finalRate = baseRate - (totalDiscountBP / 100) - (collateralDiscountBP / 100) + (potentialAddBP / 100);
+                
+                // 处理借款种类特殊规则
+                const loanType = document.querySelector('input[name="loan-type"]:checked').value;
+                let specialRateText = '';
+                
+                if (loanType === 'reloan') {
+                    // 原额度原担保收回再贷
+                    const originalRateReload = parseFloat(document.getElementById('original-rate-reloan').value);
+                    const reloanCalculatedRate = originalRateReload + (reloanAddRate / 100);
+                    
+                    if (finalRate > reloanCalculatedRate) {
+                        finalRate = reloanCalculatedRate;
+                        specialRateText = `(取原利率+${reloanAddRate}BP与计算值孰低)`;
+                    }
+                } else if (loanType === 'renew') {
+                    // 续贷/借新还旧/债务重组贷款
+                    const originalRateRenew = parseFloat(document.getElementById('original-rate-renew').value);
+                    const renewCalculatedRate = originalRateRenew - (renewDiscountRate / 100);
+                    
+                    if (renewCalculatedRate < finalRate) {
+                        finalRate = renewCalculatedRate;
+                        specialRateText = `(原利率优惠${renewDiscountRate}%)`;
+                    }
+                }
+                
+                // 确保最终利率不低于同档次LPR
+                finalRate = Math.max(finalRate, applicableLPR);
+                
+                // 更新结果显示
+                document.getElementById('result-customer-type').textContent = customerTypeText;
+                document.getElementById('result-loan-amount').textContent = `${loanAmount}万元`;
+                document.getElementById('result-loan-term').textContent = `${loanTerm}年`;
+                document.getElementById('result-lpr-type').textContent = applicableLPRType;
+                document.getElementById('result-lpr-rate').textContent = `${applicableLPR.toFixed(2)}%`;
+                document.getElementById('result-base-rate').textContent = `${baseRate.toFixed(2)}% (LPR+${baseRateBP}BP)`;
+                document.getElementById('result-discount').textContent = `-${(totalDiscountBP + collateralDiscountBP).toFixed(2)}% (-${totalDiscountBP + collateralDiscountBP}BP)`;
+                document.getElementById('result-potential-add').textContent = `+${(potentialAddBP / 100).toFixed(2)}% (+${potentialAddBP}BP)`;
+                document.getElementById('result-final-rate').textContent = `${finalRate.toFixed(2)}%${specialRateText}`;
+                
+                // 更新优惠明细
+                document.getElementById('detail-card-discount').textContent = `-${(cardDiscountBP / 100).toFixed(2)}% (-${cardDiscountBP}BP)`;
+                document.getElementById('detail-stock-discount').textContent = `-${(stockDiscountBP / 100).toFixed(2)}% (-${stockDiscountBP}BP)`;
+                document.getElementById('detail-channel-discount').textContent = `-${(channelDiscountBP / 100).toFixed(2)}% (-${channelDiscountBP}BP)`;
+                document.getElementById('detail-fund-discount').textContent = `-${(fundDiscountBP / 100).toFixed(2)}% (-${fundDiscountBP}BP)`;
+                document.getElementById('detail-collateral-discount').textContent = collateralType === 'none' 
+                    ? '-0.00% (-0BP)' 
+                    : `-${(collateralDiscountBP / 100).toFixed(2)}% (-${collateralDiscountBP}BP) (${collateralDiscountText})`;
+                
+                // 显示结果区域
+                resultSection.classList.remove('opacity-0', 'translate-y-4');
+                resultSection.classList.add('opacity-100', 'translate-y-0');
+                
+                // 滚动到结果区域
+                resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            
+            // 显示通知函数
+            function showNotification(message, type = 'info') {
+                // 创建通知元素
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full z-50 ${
+                    type === 'success' ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'
+                }`;
+                notification.textContent = message;
+                
+                // 添加到页面
+                document.body.appendChild(notification);
+                
+                // 显示通知
+                setTimeout(() => {
+                    notification.classList.remove('translate-x-full');
+                }, 100);
+                
+                // 自动关闭
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
