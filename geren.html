@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人贷款利率测算工具</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --info: #2980b9;
+            --light: #ecf0f1;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            padding-bottom: 50px;
+        }
+        
+        .container-main {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+            padding: 20px 0;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .tool-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        @media (min-width: 992px) {
+            .tool-container {
+                flex-direction: row;
+            }
+            
+            .calculation-section {
+                flex: 3;
+            }
+            
+            .config-section {
+                flex: 1;
+            }
+        }
+        
+        .section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+        }
+        
+        .section-title {
+            color: var(--secondary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(41, 128, 185, 0.2);
+            margin-top: 20px;
+        }
+        
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--success);
+            margin: 15px 0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .toggle-content {
+            padding-left: 30px;
+            border-left: 3px solid var(--primary);
+            margin: 15px 0 20px 0;
+            display: none;
+        }
+        
+        .input-help {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .config-params {
+            background-color: #f1f8e9;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        .badge-custom {
+            background-color: var(--info);
+            font-weight: normal;
+        }
+        
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .icon-circle {
+            background-color: var(--primary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="d-flex align-items-center">
+                <div class="icon-circle">
+                    <i class="fas fa-calculator fa-2x"></i>
+                </div>
+                <div>
+                    <h1 class="mb-1">个人贷款利率测算工具</h1>
+                    <p class="mb-0">基于LPR市场利率，根据客户类型及优惠项目精准测算</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container container-main">
+        <div class="tool-container">
+            <!-- 左侧：主要计算区域 -->
+            <div class="calculation-section">
+                <div class="section">
+                    <h3 class="section-title">贷款信息</h3>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">借款额度（万元）</label>
+                            <input type="number" class="form-control" id="loanAmount" min="1" value="100">
+                        </div>
+                        
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">借款期限（月）</label>
+                            <input type="number" class="form-control" id="loanTerm" min="1" max="360" value="60">
+                            <div class="input-help">3年期以下挂靠1年期LPR，3年期以上挂靠5年期LPR</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">客户信息</h3>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">客户类型</label>
+                            <select class="form-select" id="clientType">
+                                <option value="individual">个人客户</option>
+                                <option value="enterprise">小微企业主</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 form-group" id="individualCategory">
+                            <label class="form-label">个人客户分类</label>
+                            <select class="form-select" id="clientCategory">
+                                <option value="general">一般客户</option>
+                                <option value="premium">高端客户</option>
+                                <option value="preferred">其他优质客户</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">担保方式</h3>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">担保类型</label>
+                            <select class="form-select" id="guaranteeType">
+                                <option value="pledge">足值抵押</option>
+                                <option value="collateral">足值质押</option>
+                                <option value="assurance">保证类</option>
+                                <option value="combined">保证+抵押组合</option>
+                            </select>
+                        </div>
+                        
+                        <div class="toggle-content" id="guaranteeDetails">
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    <label class="form-label">抵押物评估值（万元）</label>
+                                    <input type="number" class="form-control" id="collateralValue" min="0" value="0">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label class="form-label">抵押率（%）</label>
+                                    <input type="number" class="form-control" id="collateralRate" min="1" max="100" value="70">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">优惠选项</h3>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">社保卡数量</label>
+                            <input type="number" class="form-control" id="socialSecurity" min="0" value="0">
+                            <div class="input-help">每张社保卡优惠10BP，最高50BP</div>
+                        </div>
+                        
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">股金数量（万股）</label>
+                            <input type="number" class="form-control" id="equityAmount" min="0" value="0">
+                            <div class="input-help">每10万股优惠10BP，最高50BP</div>
+                        </div>
+                        
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">渠道业务</label>
+                            <div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="mobileBankingCheck">
+                                    <label class="form-check-label" for="mobileBankingCheck">开通手机银行</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="paymentChannelCheck">
+                                    <label class="form-check-label" for="paymentChannelCheck">开通聚合支付</label>
+                                </div>
+                                <div class="input-help">最高优惠40BP</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">资金留存（万元）</label>
+                            <input type="number" class="form-control" id="fundRetention" min="0" value="0">
+                            <div class="input-help">每万元优惠1BP，最高50BP</div>
+                        </div>
+                        
+                        <div class="col-md-6 form-group switch-container">
+                            <label class="form-label">潜力客户</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="potentialClient">
+                                <label class="form-check-label" for="potentialClient">是</label>
+                            </div>
+                            <span class="badge bg-warning">+50BP</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">借款种类</h3>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <select class="form-select" id="loanType">
+                                <option value="general">一般借款</option>
+                                <option value="refinance">原额度原担保收回再贷</option>
+                                <option value="renewal">续贷借新还旧债务重组贷款</option>
+                            </select>
+                        </div>
+                        
+                        <div class="toggle-content" id="originalRateInput">
+                            <div class="form-group">
+                                <label class="form-label">原执行利率（%）</label>
+                                <input type="number" class="form-control" id="originalRate" min="0" max="20" step="0.01" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h4>测算结果</h4>
+                    <div class="result-value" id="finalRate">4.10%</div>
+                    <h5>LPR <span id="lprAdjust">+100</span> BP</h5>
+                    <p class="text-muted mb-0" id="lprReference">执行利率参照5年期LPR</p>
+                </div>
+            </div>
+            
+            <!-- 右侧：配置区域 -->
+            <div class="config-section">
+                <div class="section">
+                    <h3 class="section-title"><i class="fas fa-cog me-2"></i>系统配置</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">LPR设置</label>
+                        <div class="config-params">
+                            <div class="form-group">
+                                <label class="form-label small">1年期LPR（%）</label>
+                                <input type="number" class="form-control form-control-sm" id="lpr1Y" min="0" max="10" step="0.01" value="3.00">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label small">5年期LPR（%）</label>
+                                <input type="number" class="form-control form-control-sm" id="lpr5Y" min="0" max="10" step="0.01" value="3.50">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">优惠上限</label>
+                        <div class="config-params">
+                            <div class="form-group">
+                                <label class="form-label small">社保卡优惠上限（BP）</label>
+                                <input type="number" class="form-control form-control-sm" id="maxSocialSecurity" min="0" max="100" value="50">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label small">股金优惠上限（BP）</label>
+                                <input type="number" class="form-control form-control-sm" id="maxEquity" min="0" max="100" value="50">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label small">渠道业务优惠上限（BP）</label>
+                                <input type="number" class="form-control form-control-sm" id="maxChannel" min="0" max="100" value="40">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label small">资金留存优惠上限（BP）</label>
+                                <input type="number" class="form-control form-control-sm" id="maxFundRetention" min="0" max="100" value="50">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label small">优惠合计上限（BP）</label>
+                                <input type="number" class="form-control form-control-sm" id="maxTotalDiscount" min="0" max="500" value="100">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">质押执行利率（%）</label>
+                        <input type="number" class="form-control" id="pledgeRate" min="0" max="10" step="0.01" value="3.50">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">组合担保抵押率（%）</label>
+                        <input type="number" class="form-control" id="combinedRate" min="0" max="100" value="70">
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" id="calculateBtn"><i class="fas fa-calculator me-2"></i>计算利率</button>
+                        <button class="btn btn-outline-secondary" id="resetBtn"><i class="fas fa-redo me-2"></i>重置数据</button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title"><i class="fas fa-info-circle me-2"></i>利率计算规则</h3>
+                    <div class="alert alert-info small">
+                        <ul class="mb-0">
+                            <li>3年期以下(含)挂靠1年期LPR，3年期以上挂靠5年期LPR</li>
+                            <li>社保卡每张优惠10BP（最高50BP）</li>
+                            <li>股金每10万股优惠10BP（最高50BP）</li>
+                            <li>渠道业务（手机银行每户10BP，聚合支付20BP，最高40BP）</li>
+                            <li>资金留存每万元优惠1BP（最高50BP）</li>
+                            <li>所有优惠合计不超100BP</li>
+                            <li>足值抵押优惠100BP，足值质押固定3.5%</li>
+                            <li>潜力客户加50BP</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化计算
+            calculateRate();
+            
+            // 添加事件监听
+            document.getElementById('calculateBtn').addEventListener('click', calculateRate);
+            document.getElementById('resetBtn').addEventListener('click', resetForm);
+            
+            // 动态显示/隐藏字段
+            document.getElementById('guaranteeType').addEventListener('change', function() {
+                const details = document.getElementById('guaranteeDetails');
+                details.style.display = this.value === 'combined' ? 'block' : 'none';
+            });
+            
+            document.getElementById('loanType').addEventListener('change', function() {
+                const details = document.getElementById('originalRateInput');
+                details.style.display = this.value !== 'general' ? 'block' : 'none';
+            });
+            
+            document.getElementById('clientType').addEventListener('change', function() {
+                const category = document.getElementById('individualCategory');
+                category.style.display = this.value === 'individual' ? 'block' : 'none';
+            });
+        });
+        
+        // 主要计算函数
+        function calculateRate() {
+            // 获取贷款基本信息
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
+            const loanTerm = parseInt(document.getElementById('loanTerm').value) || 0;
+            
+            // 获取LPR配置
+            const lpr1Y = parseFloat(document.getElementById('lpr1Y').value) || 3.0;
+            const lpr5Y = parseFloat(document.getElementById('lpr5Y').value) || 3.5;
+            
+            // 确定挂钩的LPR
+            const lprReference = loanTerm <= 36 ? lpr1Y : lpr5Y;
+            document.getElementById('lprReference').textContent = 
+                `执行利率参照${loanTerm <= 36 ? '1年期' : '5年期'}LPR (${loanTerm <= 36 ? lpr1Y.toFixed(2) : lpr5Y.toFixed(2)}%)`;
+            
+            // 获取客户类型信息
+            const clientType = document.getElementById('clientType').value;
+            const clientCategory = document.getElementById('clientCategory').value;
+            
+            // 根据客户类型和额度确定基准加点
+            let baseBps;
+            if (clientType === 'individual') {
+                // 个人客户
+                if (loanAmount <= 50) {
+                    // 50万元以下
+                    if (clientCategory === 'general') baseBps = 350;
+                    else if (clientCategory === 'premium') baseBps = 50;
+                    else if (clientCategory === 'preferred') baseBps = 100;
+                } else {
+                    // 50万元以上
+                    if (clientCategory === 'general') baseBps = 400;
+                    else if (clientCategory === 'premium') baseBps = 100;
+                    else if (clientCategory === 'preferred') baseBps = 150;
+                }
+            } else {
+                // 企业客户（小微企业主）
+                baseBps = loanAmount <= 200 ? 300 : 350;
+            }
+            
+            // 获取担保方式
+            const guaranteeType = document.getElementById('guaranteeType').value;
+            const collateralValue = parseFloat(document.getElementById('collateralValue').value) || 0;
+            const collateralRate = parseFloat(document.getElementById('collateralRate').value) || 70;
+            const pledgeRate = parseFloat(document.getElementById('pledgeRate').value) || 3.5;
+            
+            // 计算基础利率（考虑担保方式）
+            let baseRate = lprReference + baseBps/100;
+            
+            // 处理组合担保情况
+            if (guaranteeType === 'combined') {
+                // 计算抵押部分和保证部分额度
+                const maxCollateralValue = collateralValue * (collateralRate / 100);
+                const collateralLoanAmount = Math.min(loanAmount, maxCollateralValue);
+                const assuranceLoanAmount = loanAmount - collateralLoanAmount;
+                
+                // 抵押部分执行LPR（0加点）
+                const collateralRateValue = lprReference;
+                
+                // 保证部分执行原基准加点
+                const assuranceRateValue = baseRate;
+                
+                // 加权平均计算利率
+                const collateralWeight = collateralLoanAmount / loanAmount;
+                const assuranceWeight = assuranceLoanAmount / loanAmount;
+                baseRate = (collateralRateValue * collateralWeight) + (assuranceRateValue * assuranceWeight);
+            } 
+            // 处理足值质押
+            else if (guaranteeType === 'collateral') {
+                baseRate = pledgeRate;
+            }
+            
+            // 计算各项优惠
+            // 社保卡优惠
+            const socialSecurityCards = parseInt(document.getElementById('socialSecurity').value) || 0;
+            const maxSocialSecurity = parseInt(document.getElementById('maxSocialSecurity').value) || 50;
+            const socialSecurityBps = Math.min(socialSecurityCards * 10, maxSocialSecurity);
+            
+            // 股金优惠
+            const equityAmount = parseInt(document.getElementById('equityAmount').value) || 0;
+            const maxEquity = parseInt(document.getElementById('maxEquity').value) || 50;
+            const equityBps = Math.min(Math.floor(equityAmount / 10) * 10, maxEquity);
+            
+            // 渠道业务优惠
+            const hasMobileBanking = document.getElementById('mobileBankingCheck').checked;
+            const hasPaymentChannel = document.getElementById('paymentChannelCheck').checked;
+            const maxChannel = parseInt(document.getElementById('maxChannel').value) || 40;
+            let channelBps = 0;
+            if (hasMobileBanking) channelBps += 10; // 假设1个手机银行账户
+            if (hasPaymentChannel) channelBps += 20;
+            channelBps = Math.min(channelBps, maxChannel);
+            
+            // 资金留存优惠
+            const fundRetention = parseFloat(document.getElementById('fundRetention').value) || 0;
+            const maxFundRetention = parseInt(document.getElementById('maxFundRetention').value) || 50;
+            const fundRetentionBps = Math.min(Math.floor(fundRetention), maxFundRetention);
+            
+            // 合计优惠（最高不超过maxTotalDiscount）
+            const maxTotalDiscount = parseInt(document.getElementById('maxTotalDiscount').value) || 100;
+            let totalDiscountBps = socialSecurityBps + equityBps + channelBps + fundRetentionBps;
+            totalDiscountBps = Math.min(totalDiscountBps, maxTotalDiscount);
+            
+            // 担保方式额外优惠
+            if (guaranteeType === 'pledge') {
+                totalDiscountBps += 100; // 足值抵押额外优惠100BP
+            }
+            
+            // 转换为百分比
+            const totalDiscount = totalDiscountBps / 100;
+            
+            // 计算扣除优惠后的利率
+            let finalRate = baseRate - totalDiscount;
+            
+            // 潜力客户加50BP
+            const isPotentialClient = document.getElementById('potentialClient').checked;
+            if (isPotentialClient) {
+                finalRate += 0.5; // 50BP
+            }
+            
+            // 处理特殊借款种类
+            const loanType = document.getElementById('loanType').value;
+            const originalRate = parseFloat(document.getElementById('originalRate').value) || 0;
+            
+            if (loanType === 'refinance' && originalRate > 0) {
+                // 收回再贷：本项填入利率加50BP与计算结果孰低
+                const alternativeRate = originalRate + 0.5;
+                finalRate = Math.min(finalRate, alternativeRate);
+            } else if (loanType === 'renewal' && originalRate > 0) {
+                // 续贷：较原利率优惠1%
+                finalRate = originalRate * 0.99; // 减少1个百分点
+            }
+            
+            // 利率不得低于同档次LPR
+            if (finalRate < lprReference) {
+                finalRate = lprReference;
+            }
+            
+            // 计算最终的加减基点
+            const finalBps = Math.round((finalRate - lprReference) * 100);
+            
+            // 显示结果
+            document.getElementById('finalRate').textContent = finalRate.toFixed(2) + '%';
+            document.getElementById('lprAdjust').textContent = finalBps > 0 ? `+${finalBps}` : finalBps;
+            document.getElementById('lprAdjust').className = finalBps > 0 ? 'text-danger' : (finalBps < 0 ? 'text-success' : '');
+        }
+        
+        // 重置表单
+        function resetForm() {
+            document.getElementById('loanAmount').value = '100';
+            document.getElementById('loanTerm').value = '60';
+            document.getElementById('clientType').value = 'individual';
+            document.getElementById('clientCategory').value = 'premium';
+            document.getElementById('guaranteeType').value = 'pledge';
+            document.getElementById('collateralValue').value = '0';
+            document.getElementById('socialSecurity').value = '0';
+            document.getElementById('equityAmount').value = '0';
+            document.getElementById('mobileBankingCheck').checked = false;
+            document.getElementById('paymentChannelCheck').checked = false;
+            document.getElementById('fundRetention').value = '0';
+            document.getElementById('potentialClient').checked = false;
+            document.getElementById('loanType').value = 'general';
+            document.getElementById('originalRate').value = '0';
+            
+            // 重置后重新计算
+            calculateRate();
+        }
+    </script>
+</body>
+</html>
