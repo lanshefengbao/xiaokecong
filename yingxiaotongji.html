@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>营销动态统计工具</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(90deg, #1a6dcc 0%, #2c91e0 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .table-container {
+            padding: 25px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 14px 16px;
+            text-align: center;
+            border: 1px solid #e1e5eb;
+        }
+        
+        th {
+            background: linear-gradient(to bottom, #f8fafd, #eef2f7);
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.05rem;
+            position: sticky;
+            top: 0;
+        }
+        
+        .branch-name {
+            background-color: #f0f7ff;
+            font-weight: 600;
+            color: #1a5ca3;
+        }
+        
+        .status-cell {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 100px;
+            position: relative;
+        }
+        
+        .status-cell:hover {
+            background-color: #f8fbff;
+        }
+        
+        .status-cell.completed {
+            background-color: #e6f7ee;
+            color: #0d6837;
+            font-weight: 500;
+        }
+        
+        .status-cell.completed::after {
+            content: "✓";
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            padding: 20px;
+            background-color: #f9fbfd;
+            border-top: 1px solid #e1e8f0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button i {
+            font-size: 1.2rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #1a6dcc, #2c91e0);
+            color: white;
+            box-shadow: 0 4px 12px rgba(28, 145, 224, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #1559b0, #2378c9);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(28, 145, 224, 0.4);
+        }
+        
+        .btn-reset {
+            background: linear-gradient(to right, #e74c3c, #ff6b6b);
+            color: white;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+        
+        .btn-reset:hover {
+            background: linear-gradient(to right, #c0392b, #e74c3c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
+        }
+        
+        .btn-stats {
+            background: linear-gradient(to right, #27ae60, #2ecc71);
+            color: white;
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+        }
+        
+        .btn-stats:hover {
+            background: linear-gradient(to right, #219653, #27ae60);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(46, 204, 113, 0.4);
+        }
+        
+        .stats-panel {
+            padding: 25px;
+            background-color: #f9fbfd;
+            border-top: 1px solid #e1e8f0;
+            display: none;
+        }
+        
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .stats-title {
+            font-size: 1.6rem;
+            color: #1a5ca3;
+        }
+        
+        .stat-group {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #2c91e0;
+        }
+        
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .stat-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .stat-value {
+            background-color: #f0f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            min-height: 60px;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(to right, #9b59b6, #8e44ad);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .copy-btn:hover {
+            background: linear-gradient(to right, #8e44ad, #7d3c98);
+            transform: translateY(-2px);
+        }
+        
+        .highlight {
+            background-color: #fff9db;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .instructions {
+            background: #e6f7ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #2c91e0;
+        }
+        
+        .instructions h3 {
+            color: #1a5ca3;
+            margin-bottom: 12px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            border-top: 1px solid #e1e8f0;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .stats-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>营销动态统计工具</h1>
+            <p class="subtitle">点击表格单元格切换完成状态，支持滑动连选，统计结果可一键复制</p>
+        </header>
+        
+        <div class="instructions">
+            <h3>使用说明</h3>
+            <ul>
+                <li>点击表格单元格可在"未完成"和"已完成"之间切换状态</li>
+                <li>在单元格上按住鼠标拖动可连续选择多个单元格（滑动连选）</li>
+                <li>点击"保存数据"按钮保存当前进度（数据存储在浏览器中）</li>
+                <li>点击"重置数据"按钮将清除所有数据</li>
+                <li>点击"生成统计报告"按钮生成完成情况分析</li>
+                <li>统计结果区域每个项目右侧有复制按钮，可一键复制统计内容</li>
+            </ul>
+        </div>
+        
+        <div class="table-container">
+            <table id="marketingTable">
+                <thead>
+                    <tr>
+                        <th>支行名称</th>
+                        <th>晨会(9点前)</th>
+                        <th>上午营销动态</th>
+                        <th>下午营销动态</th>
+                        <th>营销案例</th>
+                        <th>夕会6点半前</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 数据行将通过JavaScript生成 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="controls">
+            <button class="btn-primary" id="saveBtn">
+                <i>💾</i> 保存数据
+            </button>
+            <button class="btn-reset" id="resetBtn">
+                <i>🔄</i> 重置所有数据
+            </button>
+            <button class="btn-stats" id="statsBtn">
+                <i>📊</i> 生成统计报告
+            </button>
+        </div>
+        
+        <div id="statsPanel" class="stats-panel">
+            <div class="stats-header">
+                <h2 class="stats-title">营销动态统计结果</h2>
+            </div>
+            
+            <div class="stat-group">
+                <div class="stat-header">
+                    <h3 class="stat-title">晨会未完成单位</h3>
+                    <button class="copy-btn" data-target="morningStats">复制内容</button>
+                </div>
+                <div id="morningStats" class="stat-value"></div>
+            </div>
+            
+            <div class="stat-group">
+                <div class="stat-header">
+                    <h3 class="stat-title">上午营销动态未完成</h3>
+                    <button class="copy-btn" data-target="morningActivityStats">复制内容</button>
+                </div>
+                <div id="morningActivityStats" class="stat-value"></div>
+            </div>
+            
+            <div class="stat-group">
+                <div class="stat-header">
+                    <h3 class="stat-title">下午营销动态未完成</h3>
+                    <button class="copy-btn" data-target="afternoonActivityStats">复制内容</button>
+                </div>
+                <div id="afternoonActivityStats" class="stat-value"></div>
+            </div>
+            
+            <div class="stat-group">
+                <div class="stat-header">
+                    <h3 class="stat-title">营销案例未完成</h3>
+                    <button class="copy-btn" data-target="caseStats">复制内容</button>
+                </div>
+                <div id="caseStats" class="stat-value"></div>
+            </div>
+            
+            <div class="stat-group">
+                <div class="stat-header">
+                    <h3 class="stat-title">夕会未完成单位</h3>
+                    <button class="copy-btn" data-target="eveningStats">复制内容</button>
+                </div>
+                <div id="eveningStats" class="stat-value"></div>
+            </div>
+            
+            <div class="stat-group">
+                <div class="stat-header">
+                    <h3 class="stat-title">所有项目全部完成的支行</h3>
+                    <button class="copy-btn" data-target="allCompleted">复制内容</button>
+                </div>
+                <div id="allCompleted" class="stat-value"></div>
+            </div>
+            
+            <div class="stat-group">
+                <div class="stat-header">
+                    <h3 class="stat-title">未完成项目较多的支行 (≥3项未完成)</h3>
+                    <button class="copy-btn" data-target="problemBranches">复制内容</button>
+                </div>
+                <div id="problemBranches" class="stat-value"></div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>营销动态统计工具 &copy; 2023 | 数据存储在您的浏览器本地</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 支行数据
+            const branches = [
+                '营业部', '曲阜支行', '城区支行', '书院支行', '王庄支行',
+                '石门山支行', '防山支行', '尼山支行', '息陬支行', '小雪支行',
+                '陵城支行', '时庄支行', '姚村支行', '吴村支行', '春秋',
+                '北关', '商贸城', '杏坛支行', '廖河支行', '公司二部'
+            ];
+            
+            const columnNames = [
+                '晨会(9点前)', 
+                '上午营销动态', 
+                '下午营销动态', 
+                '营销案例', 
+                '夕会6点半前'
+            ];
+            
+            const tableBody = document.querySelector('#marketingTable tbody');
+            const saveBtn = document.getElementById('saveBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const statsBtn = document.getElementById('statsBtn');
+            const statsPanel = document.getElementById('statsPanel');
+            
+            // 滑动选择相关变量
+            let isSelecting = false;
+            let startCell = null;
+            let currentState = null;
+            
+            // 初始化表格
+            function initTable() {
+                tableBody.innerHTML = '';
+                
+                branches.forEach(branch => {
+                    const row = document.createElement('tr');
+                    
+                    // 添加支行名称单元格
+                    const branchCell = document.createElement('td');
+                    branchCell.textContent = branch;
+                    branchCell.className = 'branch-name';
+                    row.appendChild(branchCell);
+                    
+                    // 为每个状态列添加单元格
+                    for (let i = 0; i < 5; i++) {
+                        const cell = document.createElement('td');
+                        cell.className = 'status-cell';
+                        cell.dataset.branch = branch;
+                        cell.dataset.column = i;
+                        cell.textContent = '未完成';
+                        
+                        // 添加事件监听器
+                        cell.addEventListener('click', handleCellClick);
+                        cell.addEventListener('mousedown', handleMouseDown);
+                        cell.addEventListener('mouseover', handleMouseOver);
+                        
+                        row.appendChild(cell);
+                    }
+                    
+                    tableBody.appendChild(row);
+                });
+                
+                // 尝试加载保存的数据
+                loadSavedData();
+            }
+            
+            // 处理单元格点击
+            function handleCellClick(e) {
+                if (isSelecting) return; // 如果是滑动选择，则不处理点击事件
+                toggleCellState(this);
+            }
+            
+            // 处理鼠标按下
+            function handleMouseDown(e) {
+                isSelecting = true;
+                startCell = this;
+                currentState = this.textContent === '已完成';
+                
+                // 切换当前单元格状态
+                toggleCellState(this);
+                
+                // 添加全局事件监听器
+                document.addEventListener('mouseup', handleMouseUp);
+                document.addEventListener('mouseleave', handleMouseUp);
+            }
+            
+            // 处理鼠标经过
+            function handleMouseOver(e) {
+                if (!isSelecting || !startCell) return;
+                
+                // 切换当前单元格状态
+                setCellState(this, !currentState);
+            }
+            
+            // 处理鼠标释放
+            function handleMouseUp(e) {
+                isSelecting = false;
+                startCell = null;
+                
+                // 移除全局事件监听器
+                document.removeEventListener('mouseup', handleMouseUp);
+                document.removeEventListener('mouseleave', handleMouseUp);
+            }
+            
+            // 切换单元格状态
+            function toggleCellState(cell) {
+                if (cell.textContent === '未完成') {
+                    cell.textContent = '已完成';
+                    cell.classList.add('completed');
+                } else {
+                    cell.textContent = '未完成';
+                    cell.classList.remove('completed');
+                }
+            }
+            
+            // 设置单元格状态
+            function setCellState(cell, completed) {
+                if (completed) {
+                    cell.textContent = '已完成';
+                    cell.classList.add('completed');
+                } else {
+                    cell.textContent = '未完成';
+                    cell.classList.remove('completed');
+                }
+            }
+            
+            // 保存数据到本地存储
+            function saveData() {
+                const data = {};
+                document.querySelectorAll('.status-cell').forEach(cell => {
+                    const branch = cell.dataset.branch;
+                    const column = cell.dataset.column;
+                    
+                    if (!data[branch]) {
+                        data[branch] = [];
+                    }
+                    
+                    data[branch][column] = cell.textContent === '已完成';
+                });
+                
+                localStorage.setItem('marketingData', JSON.stringify(data));
+                showToast('数据保存成功！');
+            }
+            
+            // 从本地存储加载数据
+            function loadSavedData() {
+                const savedData = localStorage.getItem('marketingData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    
+                    Object.keys(data).forEach(branch => {
+                        data[branch].forEach((completed, columnIndex) => {
+                            const cell = document.querySelector(`.status-cell[data-branch="${branch}"][data-column="${columnIndex}"]`);
+                            if (cell) {
+                                cell.textContent = completed ? '已完成' : '未完成';
+                                if (completed) {
+                                    cell.classList.add('completed');
+                                }
+                            }
+                        });
+                    });
+                }
+            }
+            
+            // 重置所有数据
+            function resetData() {
+                if (confirm('确定要重置所有数据吗？所有数据将被清除！')) {
+                    document.querySelectorAll('.status-cell').forEach(cell => {
+                        cell.textContent = '未完成';
+                        cell.classList.remove('completed');
+                    });
+                    localStorage.removeItem('marketingData');
+                    statsPanel.style.display = 'none';
+                    showToast('数据已重置');
+                }
+            }
+            
+            // 生成统计报告
+            function generateStats() {
+                const stats = {
+                    morningIncomplete: [],
+                    morningActivityIncomplete: [],
+                    afternoonActivityIncomplete: [],
+                    caseIncomplete: [],
+                    eveningIncomplete: [],
+                    allCompleted: [],
+                    problemBranches: []
+                };
+                
+                branches.forEach(branch => {
+                    let completedCount = 0;
+                    let incompleteCount = 0;
+                    
+                    for (let i = 0; i < 5; i++) {
+                        const cell = document.querySelector(`.status-cell[data-branch="${branch}"][data-column="${i}"]`);
+                        const isCompleted = cell.textContent === '已完成';
+                        
+                        if (!isCompleted) {
+                            incompleteCount++;
+                            switch(i) {
+                                case 0: stats.morningIncomplete.push(branch); break;
+                                case 1: stats.morningActivityIncomplete.push(branch); break;
+                                case 2: stats.afternoonActivityIncomplete.push(branch); break;
+                                case 3: stats.caseIncomplete.push(branch); break;
+                                case 4: stats.eveningIncomplete.push(branch); break;
+                            }
+                        } else {
+                            completedCount++;
+                        }
+                    }
+                    
+                    if (completedCount === 5) {
+                        stats.allCompleted.push(branch);
+                    }
+                    
+                    if (incompleteCount >= 3) {
+                        stats.problemBranches.push(`${branch} (${incompleteCount}项未完成)`);
+                    }
+                });
+                
+                // 更新显示统计结果
+                document.getElementById('morningStats').textContent = 
+                    stats.morningIncomplete.length > 0 ? 
+                    `晨会未完成单位有：${stats.morningIncomplete.join('、')}` : 
+                    '晨会所有单位均已完成';
+                
+                document.getElementById('morningActivityStats').textContent = 
+                    stats.morningActivityIncomplete.length > 0 ? 
+                    `上午营销动态未完成的有：${stats.morningActivityIncomplete.join('、')}` : 
+                    '上午营销动态所有单位均已完成';
+                
+                document.getElementById('afternoonActivityStats').textContent = 
+                    stats.afternoonActivityIncomplete.length > 0 ? 
+                    `下午营销动态未完成的有：${stats.afternoonActivityIncomplete.join('、')}` : 
+                    '下午营销动态所有单位均已完成';
+                
+                document.getElementById('caseStats').textContent = 
+                    stats.caseIncomplete.length > 0 ? 
+                    `营销案例未完成的有：${stats.caseIncomplete.join('、')}` : 
+                    '营销案例所有单位均已完成';
+                
+                document.getElementById('eveningStats').textContent = 
+                    stats.eveningIncomplete.length > 0 ? 
+                    `夕会未完成单位有：${stats.eveningIncomplete.join('、')}` : 
+                    '夕会所有单位均已完成';
+                
+                document.getElementById('allCompleted').textContent = 
+                    stats.allCompleted.length > 0 ? 
+                    `所有项目全部完成的支行有：${stats.allCompleted.join('、')}` : 
+                    '暂无所有项目全部完成的支行';
+                
+                document.getElementById('problemBranches').textContent = 
+                    stats.problemBranches.length > 0 ? 
+                    `未完成项目较多的支行：${stats.problemBranches.join('、')}` : 
+                    '暂无未完成项目较多的支行';
+                
+                // 显示统计面板
+                statsPanel.style.display = 'block';
+                
+                // 滚动到统计结果
+                statsPanel.scrollIntoView({ behavior: 'smooth' });
+                
+                // 添加复制按钮事件
+                setupCopyButtons();
+            }
+            
+            // 设置复制按钮事件
+            function setupCopyButtons() {
+                document.querySelectorAll('.copy-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const targetId = this.dataset.target;
+                        const content = document.getElementById(targetId).textContent;
+                        copyToClipboard(content);
+                        showToast('内容已复制到剪贴板');
+                    });
+                });
+            }
+            
+            // 复制到剪贴板
+            function copyToClipboard(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+            
+            // 显示提示消息
+            function showToast(message) {
+                // 移除现有的提示
+                const existingToast = document.querySelector('.toast');
+                if (existingToast) existingToast.remove();
+                
+                // 创建提示元素
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 30px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(0, 0, 0, 0.8);
+                    color: white;
+                    padding: 12px 25px;
+                    border-radius: 30px;
+                    font-size: 1rem;
+                    z-index: 1000;
+                    animation: fadeInOut 3s ease-in-out;
+                `;
+                
+                // 添加动画样式
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes fadeInOut {
+                        0% { opacity: 0; bottom: 0; }
+                        10% { opacity: 1; bottom: 30px; }
+                        90% { opacity: 1; bottom: 30px; }
+                        100% { opacity: 0; bottom: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                document.body.appendChild(toast);
+                
+                // 3秒后移除提示
+                setTimeout(() => {
+                    toast.remove();
+                    style.remove();
+                }, 3000);
+            }
+            
+            // 添加事件监听器
+            saveBtn.addEventListener('click', saveData);
+            resetBtn.addEventListener('click', resetData);
+            statsBtn.addEventListener('click', generateStats);
+            
+            // 初始化表格
+            initTable();
+        });
+    </script>
+</body>
+</html>
