@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>营销动态统计表</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px 10px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 25px;
+            background: linear-gradient(90deg, #1a3a6c, #2c5282);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #2c5282, #1a3a6c);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #718096, #4a5568);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 25px 0;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #2c5282, #1a3a6c);
+            color: white;
+            font-weight: 600;
+            padding: 15px 10px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+        }
+        
+        td {
+            padding: 12px 10px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background-color 0.2s;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+        
+        select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+        
+        .completed {
+            background-color: #c6f6d5;
+            font-weight: 600;
+            color: #22543d;
+        }
+        
+        .not-completed {
+            background-color: #fed7d7;
+            color: #822727;
+        }
+        
+        .analysis-section {
+            margin-top: 40px;
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+            color: #2c5282;
+            font-size: 1.5rem;
+        }
+        
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .analysis-card {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #2c5282;
+        }
+        
+        .analysis-card h3 {
+            margin-bottom: 15px;
+            color: #2c5282;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .analysis-content {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 120px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 15px;
+            line-height: 1.7;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(135deg, #38a169, #2f855a);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background: linear-gradient(135deg, #2f855a, #276749);
+        }
+        
+        .stats-summary {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ebf4ff, #e6fffa);
+            border-radius: 12px;
+            border: 1px solid #c3dafe;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c5282;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: #4a5568;
+        }
+        
+        .highlight {
+            background-color: #fffbeb;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .good {
+            color: #2f855a;
+        }
+        
+        .warning {
+            color: #c05621;
+        }
+        
+        .critical {
+            color: #c53030;
+        }
+        
+        .footer-note {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+                font-size: 0.9rem;
+            }
+            
+            select {
+                padding: 6px 8px;
+                font-size: 0.85rem;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.95rem;
+            }
+            
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-chart-line"></i> 营销动态统计表</h1>
+            <div class="subtitle">各支行营销工作完成情况统计与分析</div>
+        </header>
+        
+        <div class="controls">
+            <button id="saveBtn" class="btn btn-primary">
+                <i class="fas fa-save"></i> 保存数据
+            </button>
+            <button id="resetBtn" class="btn btn-secondary">
+                <i class="fas fa-redo"></i> 重置表格
+            </button>
+        </div>
+        
+        <div class="table-container">
+            <table id="statsTable">
+                <thead>
+                    <tr>
+                        <th>支行名称</th>
+                        <th>晨会（9点前）</th>
+                        <th>上午营销动态</th>
+                        <th>下午营销动态</th>
+                        <th>营销案例</th>
+                        <th>夕会6点半前</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="stats-summary">
+            <div class="stat-item">
+                <div class="stat-value" id="totalBranches">20</div>
+                <div class="stat-label">总支行数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="completedTasks">0</div>
+                <div class="stat-label">已完成任务</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="completionRate">0%</div>
+                <div class="stat-label">整体完成率</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="fullCompletion">0</div>
+                <div class="stat-label">全部完成支行</div>
+            </div>
+        </div>
+        
+        <div class="analysis-section">
+            <div class="section-title">
+                <h2><i class="fas fa-chart-pie"></i> 数据分析报告</h2>
+            </div>
+            
+            <div class="analysis-grid">
+                <div class="analysis-card">
+                    <h3><i class="fas fa-sun"></i> 晨会（9点前）</h3>
+                    <div class="analysis-content" id="morningAnalysis">
+                        暂无数据，请填写统计表
+                    </div>
+                    <button class="copy-btn" data-target="morningAnalysis">
+                        <i class="fas fa-copy"></i> 复制分析结果
+                    </button>
+                </div>
+                
+                <div class="analysis-card">
+                    <h3><i class="fas fa-clock"></i> 上午营销动态</h3>
+                    <div class="analysis-content" id="amAnalysis">
+                        暂无数据，请填写统计表
+                    </div>
+                    <button class="copy-btn" data-target="amAnalysis">
+                        <i class="fas fa-copy"></i> 复制分析结果
+                    </button>
+                </div>
+                
+                <div class="analysis-card">
+                    <h3><i class="fas fa-clock"></i> 下午营销动态</h3>
+                    <div class="analysis-content" id="pmAnalysis">
+                        暂无数据，请填写统计表
+                    </div>
+                    <button class="copy-btn" data-target="pmAnalysis">
+                        <i class="fas fa-copy"></i> 复制分析结果
+                    </button>
+                </div>
+                
+                <div class="analysis-card">
+                    <h3><i class="fas fa-lightbulb"></i> 营销案例</h3>
+                    <div class="analysis-content" id="caseAnalysis">
+                        暂无数据，请填写统计表
+                    </div>
+                    <button class="copy-btn" data-target="caseAnalysis">
+                        <i class="fas fa-copy"></i> 复制分析结果
+                    </button>
+                </div>
+                
+                <div class="analysis-card">
+                    <h3><i class="fas fa-moon"></i> 夕会6点半前</h3>
+                    <div class="analysis-content" id="eveningAnalysis">
+                        暂无数据，请填写统计表
+                    </div>
+                    <button class="copy-btn" data-target="eveningAnalysis">
+                        <i class="fas fa-copy"></i> 复制分析结果
+                    </button>
+                </div>
+                
+                <div class="analysis-card">
+                    <h3><i class="fas fa-tasks"></i> 支行完成情况</h3>
+                    <div class="analysis-content" id="branchAnalysis">
+                        暂无数据，请填写统计表
+                    </div>
+                    <button class="copy-btn" data-target="branchAnalysis">
+                        <i class="fas fa-copy"></i> 复制分析结果
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-note">
+            <p>数据实时更新 • 上次保存时间: <span id="lastSaved">从未保存</span></p>
+        </div>
+    </div>
+
+    <script>
+        // 支行数据
+        const branches = [
+            "营业部", "曲阜支行", "城区支行", "书院支行", "王庄支行", 
+            "石门山支行", "防山支行", "尼山支行", "息顺支行", "小雪支行", 
+            "陵城支行", "时庄支行", "姚村支行", "吴村支行", "春秋", 
+            "北关", "商贸城", "杏坛支行", "廖河支行", "公司二部"
+        ];
+        
+        // 表头
+        const headers = [
+            "晨会（9点前）", 
+            "上午营销动态", 
+            "下午营销动态", 
+            "营销案例", 
+            "夕会6点半前"
+        ];
+        
+        // 初始化数据
+        let tableData = {};
+        
+        // 初始化表格
+        function initTable() {
+            const tbody = document.querySelector("#statsTable tbody");
+            tbody.innerHTML = "";
+            
+            branches.forEach(branch => {
+                const row = document.createElement("tr");
+                
+                // 支行名称单元格
+                const branchCell = document.createElement("td");
+                branchCell.textContent = branch;
+                branchCell.style.fontWeight = "600";
+                row.appendChild(branchCell);
+                
+                // 为每个任务创建下拉框
+                headers.forEach((header, index) => {
+                    const cell = document.createElement("td");
+                    const select = document.createElement("select");
+                    select.dataset.branch = branch;
+                    select.dataset.task = header;
+                    
+                    const option1 = document.createElement("option");
+                    option1.value = "未完成";
+                    option1.textContent = "未完成";
+                    
+                    const option2 = document.createElement("option");
+                    option2.value = "已完成";
+                    option2.textContent = "已完成";
+                    
+                    select.appendChild(option1);
+                    select.appendChild(option2);
+                    
+                    // 设置默认值或从存储中恢复
+                    if (tableData[branch] && tableData[branch][index] === "已完成") {
+                        select.value = "已完成";
+                        cell.classList.add("completed");
+                    } else {
+                        select.value = "未完成";
+                        cell.classList.add("not-completed");
+                    }
+                    
+                    // 添加变更事件
+                    select.addEventListener("change", function() {
+                        if (this.value === "已完成") {
+                            cell.classList.remove("not-completed");
+                            cell.classList.add("completed");
+                        } else {
+                            cell.classList.remove("completed");
+                            cell.classList.add("not-completed");
+                        }
+                        updateTableData();
+                        analyzeData();
+                    });
+                    
+                    cell.appendChild(select);
+                    row.appendChild(cell);
+                });
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // 更新表格数据
+        function updateTableData() {
+            const selects = document.querySelectorAll("select");
+            
+            branches.forEach(branch => {
+                if (!tableData[branch]) {
+                    tableData[branch] = [];
+                }
+                
+                headers.forEach((_, index) => {
+                    const select = document.querySelector(`select[data-branch="${branch}"][data-task="${headers[index]}"]`);
+                    tableData[branch][index] = select.value;
+                });
+            });
+            
+            // 更新统计信息
+            updateStats();
+        }
+        
+        // 更新统计信息
+        function updateStats() {
+            let completedTasks = 0;
+            let totalTasks = branches.length * headers.length;
+            let fullCompletionCount = 0;
+            
+            // 计算完成情况
+            branches.forEach(branch => {
+                let branchCompleted = true;
+                
+                headers.forEach((_, index) => {
+                    if (tableData[branch] && tableData[branch][index] === "已完成") {
+                        completedTasks++;
+                    } else {
+                        branchCompleted = false;
+                    }
+                });
+                
+                if (branchCompleted) fullCompletionCount++;
+            });
+            
+            // 更新统计显示
+            document.getElementById("completedTasks").textContent = completedTasks;
+            document.getElementById("completionRate").textContent = 
+                Math.round((completedTasks / totalTasks) * 100) + "%";
+            document.getElementById("fullCompletion").textContent = fullCompletionCount;
+        }
+        
+        // 分析数据
+        function analyzeData() {
+            // 初始化分析结果
+            const analysis = {
+                morning: { completed: [], notCompleted: [] },
+                am: { completed: [], notCompleted: [] },
+                pm: { completed: [], notCompleted: [] },
+                cases: { completed: [], notCompleted: [] },
+                evening: { completed: [], notCompleted: [] },
+                branches: { completed: [], notCompleted: [], partial: [] }
+            };
+            
+            // 按任务收集数据
+            branches.forEach(branch => {
+                // 晨会
+                if (tableData[branch][0] === "已完成") {
+                    analysis.morning.completed.push(branch);
+                } else {
+                    analysis.morning.notCompleted.push(branch);
+                }
+                
+                // 上午营销动态
+                if (tableData[branch][1] === "已完成") {
+                    analysis.am.completed.push(branch);
+                } else {
+                    analysis.am.notCompleted.push(branch);
+                }
+                
+                // 下午营销动态
+                if (tableData[branch][2] === "已完成") {
+                    analysis.pm.completed.push(branch);
+                } else {
+                    analysis.pm.notCompleted.push(branch);
+                }
+                
+                // 营销案例
+                if (tableData[branch][3] === "已完成") {
+                    analysis.cases.completed.push(branch);
+                } else {
+                    analysis.cases.notCompleted.push(branch);
+                }
+                
+                // 夕会
+                if (tableData[branch][4] === "已完成") {
+                    analysis.evening.completed.push(branch);
+                } else {
+                    analysis.evening.notCompleted.push(branch);
+                }
+                
+                // 支行完成情况
+                const completedCount = tableData[branch].filter(status => status === "已完成").length;
+                if (completedCount === headers.length) {
+                    analysis.branches.completed.push(branch);
+                } else if (completedCount === 0) {
+                    analysis.branches.notCompleted.push(branch);
+                } else {
+                    analysis.branches.partial.push({
+                        branch: branch,
+                        completed: completedCount,
+                        total: headers.length
+                    });
+                }
+            });
+            
+            // 更新分析显示
+            updateAnalysisDisplay(analysis);
+        }
+        
+        // 更新分析显示
+        function updateAnalysisDisplay(analysis) {
+            // 晨会（9点前）分析
+            document.getElementById("morningAnalysis").innerHTML = `
+                <p>截至目前，晨会已完成单位：${analysis.morning.completed.length > 0 ? 
+                    analysis.morning.completed.join("、") : "无"}</p>
+                <p class="${analysis.morning.notCompleted.length > 0 ? 'critical' : 'good'}">未完成单位：${analysis.morning.notCompleted.length > 0 ? 
+                    analysis.morning.notCompleted.join("、") : "所有单位均已完成"}</p>
+            `;
+            
+            // 上午营销动态分析
+            document.getElementById("amAnalysis").innerHTML = `
+                <p>截至目前，上午营销动态分析已完成单位：${analysis.am.completed.length > 0 ? 
+                    analysis.am.completed.join("、") : "无"}</p>
+                <p class="${analysis.am.notCompleted.length > 0 ? 'critical' : 'good'}">未完成单位：${analysis.am.notCompleted.length > 0 ? 
+                    analysis.am.notCompleted.join("、") : "所有单位均已完成"}</p>
+            `;
+            
+            // 下午营销动态分析
+            document.getElementById("pmAnalysis").innerHTML = `
+                <p>截至目前，下午营销动态分析已完成单位：${analysis.pm.completed.length > 0 ? 
+                    analysis.pm.completed.join("、") : "无"}</p>
+                <p class="${analysis.pm.notCompleted.length > 0 ? 'critical' : 'good'}">未完成单位：${analysis.pm.notCompleted.length > 0 ? 
+                    analysis.pm.notCompleted.join("、") : "所有单位均已完成"}</p>
+            `;
+            
+            // 营销案例分析
+            document.getElementById("caseAnalysis").innerHTML = `
+                <p>截至目前，营销案例分析已完成单位：${analysis.cases.completed.length > 0 ? 
+                    analysis.cases.completed.join("、") : "无"}</p>
+                <p class="${analysis.cases.notCompleted.length > 0 ? 'critical' : 'good'}">未完成单位：${analysis.cases.notCompleted.length > 0 ? 
+                    analysis.cases.notCompleted.join("、") : "所有单位均已完成"}</p>
+            `;
+            
+            // 夕会分析
+            document.getElementById("eveningAnalysis").innerHTML = `
+                <p>截至目前，夕会已完成单位：${analysis.evening.completed.length > 0 ? 
+                    analysis.evening.completed.join("、") : "无"}</p>
+                <p class="${analysis.evening.notCompleted.length > 0 ? 'critical' : 'good'}">未完成单位：${analysis.evening.notCompleted.length > 0 ? 
+                    analysis.evening.notCompleted.join("、") : "所有单位均已完成"}</p>
+            `;
+            
+            // 支行完成情况分析
+            let branchHtml = `<p>全部完成单位：${analysis.branches.completed.length > 0 ? 
+                analysis.branches.completed.join("、") : "无"}</p>`;
+            
+            branchHtml += `<p class="${analysis.branches.notCompleted.length > 0 ? 'critical' : 'good'}">全部未完成单位：${analysis.branches.notCompleted.length > 0 ? 
+                analysis.branches.notCompleted.join("、") : "无"}</p>`;
+            
+            if (analysis.branches.partial.length > 0) {
+                branchHtml += `<p>部分完成单位：</p><ul>`;
+                analysis.branches.partial.sort((a, b) => b.completed - a.completed).forEach(item => {
+                    branchHtml += `<li>${item.branch}：完成 ${item.completed}/${item.total} 项</li>`;
+                });
+                branchHtml += `</ul>`;
+            }
+            
+            document.getElementById("branchAnalysis").innerHTML = branchHtml;
+        }
+        
+        // 保存数据到本地存储
+        function saveData() {
+            localStorage.setItem("marketingStatsData", JSON.stringify(tableData));
+            const now = new Date();
+            document.getElementById("lastSaved").textContent = 
+                `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ` +
+                `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            // 显示保存成功提示
+            alert("数据保存成功！");
+        }
+        
+        // 重置数据
+        function resetData() {
+            if (confirm("确定要重置所有数据吗？此操作不可撤销。")) {
+                tableData = {};
+                initTable();
+                analyzeData();
+                localStorage.removeItem("marketingStatsData");
+                document.getElementById("lastSaved").textContent = "从未保存";
+            }
+        }
+        
+        // 复制分析结果
+        function setupCopyButtons() {
+            document.querySelectorAll(".copy-btn").forEach(button => {
+                button.addEventListener("click", function() {
+                    const targetId = this.dataset.target;
+                    const content = document.getElementById(targetId).textContent;
+                    
+                    navigator.clipboard.writeText(content)
+                        .then(() => {
+                            const originalText = this.innerHTML;
+                            this.innerHTML = '<i class="fas fa-check"></i> 已复制';
+                            
+                            setTimeout(() => {
+                                this.innerHTML = originalText;
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('复制失败:', err);
+                            alert("复制失败，请手动复制内容");
+                        });
+                });
+            });
+        }
+        
+        // 页面加载时初始化
+        document.addEventListener("DOMContentLoaded", function() {
+            // 尝试加载保存的数据
+            const savedData = localStorage.getItem("marketingStatsData");
+            if (savedData) {
+                try {
+                    tableData = JSON.parse(savedData);
+                    document.getElementById("lastSaved").textContent = "已加载保存的数据";
+                } catch (e) {
+                    console.error("加载保存数据失败:", e);
+                    tableData = {};
+                }
+            }
+            
+            // 初始化表格
+            initTable();
+            
+            // 初始分析
+            analyzeData();
+            
+            // 设置按钮事件
+            document.getElementById("saveBtn").addEventListener("click", saveData);
+            document.getElementById("resetBtn").addEventListener("click", resetData);
+            
+            // 设置复制按钮
+            setupCopyButtons();
+            
+            // 更新统计信息
+            updateStats();
+        });
+    </script>
+</body>
+</html>
